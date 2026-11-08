@@ -16,9 +16,9 @@ st.set_page_config(
 count = st_autorefresh(interval=5000, limit=None, key="datarefresh")
 
 # --- SUPABASE CONNECTION ---
-# Tip: Use Streamlit Secrets for production, or paste keys here for local testing
-SUPABASE_URL = "https://dgsqiohgkkbjlgwfspwm.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3Fpb2hna2tiamxnd2ZzcHdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1MTQwMzUsImV4cCI6MjEwODA5MDAzNX0.iJpDiVaLqi-yY-KW4aHvXz8maJ9UT2F8VsWKuI-ohXA"
+# Fetch credentials securely from Streamlit Secrets
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
 @st.cache_resource
 def init_supabase():
