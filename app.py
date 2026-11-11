@@ -41,6 +41,13 @@ def load_data():
 
 df = load_data()
 
+# --- 1. MASK SECRET ROLLS ---
+# Create a display copy so public users don't see secret numbers
+display_df = df.copy()
+if "is_secret" in display_df.columns:
+    display_df.loc[display_df["is_secret"] == True, "raw_d20"] = "🔒 Secret"
+    display_df.loc[display_df["is_secret"] == True, "value"] = "🔒 Hidden"
+
 # --- TITLE ---
 st.title("🛡️ Pathfinder 2e: Live Campaign Dashboard")
 st.markdown("Tracking dice rolls, wealth, spells, and damage live from Foundry VTT.")
@@ -50,11 +57,23 @@ if df.empty:
 else:
     # --- SIDEBAR FILTERS ---
     st.sidebar.header("Filters")
-    characters = df["character_name"].dropna().unique().tolist()
+    
+    # --- 2. GM PASSWORD TOGGLE ---
+    gm_password = st.sidebar.text_input("GM Password", type="password")
+    is_gm = (gm_password == "your_secret_gm_password")  # Set your own password here
+
+    # Filter dataframe based on GM status if the column exists
+    if not is_gm and "is_secret" in df.columns:
+        # Hide secret rolls from the metrics and tabs entirely for players
+        active_df = df[df["is_secret"] != True]
+    else:
+        active_df = df # GM sees everything
+
+    characters = active_df["character_name"].dropna().unique().tolist()
     selected_char = st.sidebar.selectbox("Filter by Character", ["All"] + characters)
     
     if selected_char != "All":
-        df = df[df["character_name"] == selected_char]
+        active_df = active_df[active_df["character_name"] == selected_char]
 
     # --- TOP METRICS ROW ---
     col1, col2, col3, col4 = st.columns(4)
