@@ -20,6 +20,8 @@ count = st_autorefresh(interval=5000, limit=None, key="datarefresh")
 SUPABASE_URL = st.secrets["SUPABASE_URL"]
 SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 @st.cache_resource
 def init_supabase():
     return create_client(SUPABASE_URL, SUPABASE_KEY)
