@@ -29,7 +29,8 @@ supabase = init_supabase()
 # --- FETCH DATA ---
 @st.cache_data(ttl=5) # Refreshes cache every 5 seconds for live feel
 def load_data():
-    response = supabase.table("event_logs").select("*").order("id", desc=True).execute()
+    #response = supabase.table("event_logs").select("*").order("id", desc=True).execute()
+    response = supabase.table("event_logs").select("*").execute() # debug - removed order by to determine if there is a clash with bkup table
     if response.data:
         return pd.DataFrame(response.data)
     return pd.DataFrame(response.data)
