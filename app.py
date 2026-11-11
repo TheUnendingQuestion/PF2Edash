@@ -28,7 +28,6 @@ count = st_autorefresh(interval=5000, limit=None, key="datarefresh")
 #print(f"DEBUG URL Loaded: {SUPABASE_URL[:15]}...")
 #print(f"DEBUG Key Length: {len(SUPABASE_KEY)}")
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # --- SUPABASE CONNECTION ---
 # Fetch credentials securely from Streamlit Secrets
 SUPABASE_URL = st.secrets["SUPABASE_URL"].strip()
