@@ -15,23 +15,12 @@ st.set_page_config(
 # Automatically refreshes the dashboard data every 5 seconds (5000 milliseconds)
 count = st_autorefresh(interval=5000, limit=None, key="datarefresh")
 
-# Safely extract secrets with fallback options
-#try:
- #   SUPABASE_URL = st.secrets["SUPABASE_URL"]
-  #  SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
-#except Exception:
-    # Fallback if nested under a [connections.supabase] section block
- #   SUPABASE_URL = st.secrets["connections"]["supabase"]["SUPABASE_URL"]
-  #  SUPABASE_KEY = st.secrets["connections"]["supabase"]["SUPABASE_KEY"]
-
-# Verification check in logs: prints length and prefix, never the full key
-#print(f"DEBUG URL Loaded: {SUPABASE_URL[:15]}...")
-#print(f"DEBUG Key Length: {len(SUPABASE_KEY)}")
-
 # --- SUPABASE CONNECTION ---
 # Fetch credentials securely from Streamlit Secrets
-SUPABASE_URL = st.secrets["SUPABASE_URL"].strip()
-SUPABASE_KEY = st.secrets["SUPABASE_KEY"].strip()
+#SUPABASE_URL = st.secrets["SUPABASE_URL"].strip()
+#SUPABASE_KEY = st.secrets["SUPABASE_KEY"].strip()
+SUPABASE_URL = "https://dgsqiohgkkbjlgwfspwm.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnc3Fpb2hna2tiamxnd2ZzcHdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1MTQwMzUsImV4cCI6MjEwODA5MDAzNX0.iJpDiVaLqi-yY-KW4aHvXz8maJ9UT2F8VsWKuI-ohXA"
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
