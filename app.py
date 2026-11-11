@@ -16,23 +16,23 @@ st.set_page_config(
 count = st_autorefresh(interval=5000, limit=None, key="datarefresh")
 
 # Safely extract secrets with fallback options
-try:
-    SUPABASE_URL = st.secrets["SUPABASE_URL"]
-    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
-except Exception:
+#try:
+ #   SUPABASE_URL = st.secrets["SUPABASE_URL"]
+  #  SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+#except Exception:
     # Fallback if nested under a [connections.supabase] section block
-    SUPABASE_URL = st.secrets["connections"]["supabase"]["SUPABASE_URL"]
-    SUPABASE_KEY = st.secrets["connections"]["supabase"]["SUPABASE_KEY"]
+ #   SUPABASE_URL = st.secrets["connections"]["supabase"]["SUPABASE_URL"]
+  #  SUPABASE_KEY = st.secrets["connections"]["supabase"]["SUPABASE_KEY"]
 
 # Verification check in logs: prints length and prefix, never the full key
-print(f"DEBUG URL Loaded: {SUPABASE_URL[:15]}...")
-print(f"DEBUG Key Length: {len(SUPABASE_KEY)}")
+#print(f"DEBUG URL Loaded: {SUPABASE_URL[:15]}...")
+#print(f"DEBUG Key Length: {len(SUPABASE_KEY)}")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # --- SUPABASE CONNECTION ---
 # Fetch credentials securely from Streamlit Secrets
-#SUPABASE_URL = st.secrets["SUPABASE_URL"]
-#SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+SUPABASE_URL = st.secrets["SUPABASE_URL"].strip()
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"].strip()
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
