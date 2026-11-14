@@ -45,6 +45,8 @@ function calculateActorWealth(actor) {
   return 0;
 }
 
+let lastDamageRoller = null; // Tracks who rolled the most recent damage card
+
 // --- HOOKS ---
 
 Hooks.on("createChatMessage", (message) => {
@@ -54,22 +56,39 @@ Hooks.on("createChatMessage", (message) => {
   const content = message.content ? message.content.toLowerCase() : "";
   const activeActor = message.actor;
   const activeActorName = activeActor ? activeActor.name : null;
+  const pf2eFlags = message.flags?.pf2e;
+  const context = pf2eFlags?.context;
 
-  // 1. Detect Damage Taken
+  // Record who rolled damage so AOE applications can attribute damage back to them
+  if (message.isRoll && context?.type === "damage-roll" && activeActor?.type === "character") {
+    lastDamageRoller = activeActor.name;
+  }
+
+ // 1. Detect Damage Taken (1 entry per target hit -> 4 targets x 20 = 80)
   if (content.includes("takes") && content.includes("damage")) {
     const match = message.content.match(/([0-9]+)\s+damage/i);
     const targetName = message.speaker?.alias || activeActorName;
+
+    // Try to resolve the originating actor from PF2e's appliedDamage flag, falling back to lastDamageRoller
+    let dealerName = lastDamageRoller;
+    const originUuid = pf2eFlags?.appliedDamage?.origin;
+    if (originUuid) {
+      const originDoc = fromUuidSync(originUuid);
+      const originActor = originDoc?.actor ?? originDoc;
+      if (originActor?.name) dealerName = originActor.name;
+    }
+
     if (match && targetName) {
       sendToDashboard({
         message_id: message.id,
         character_name: targetName,
+        source_actor: dealerName,
         event_type: "damage_taken",
         value: Number(match[1]),
         timestamp: new Date().toISOString()
       });
     }
   }
-
   if (!activeActor || activeActor.type !== "character") return;
 
   const pf2eFlags = message.flags?.pf2e;
