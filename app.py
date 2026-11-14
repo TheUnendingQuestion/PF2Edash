@@ -69,29 +69,39 @@ else:
     else:
         active_df = df # GM sees everything
 
-    characters = active_df["character_name"].dropna().unique().tolist()
+    characters = df["character_name"].dropna().unique().tolist()
+    if "source_actor" in df.columns:
+        characters = sorted(set(characters + df["source_actor"].dropna().unique().tolist()))
+
     selected_char = st.sidebar.selectbox("Filter by Character", ["All"] + characters)
-    
+
     if selected_char != "All":
-        active_df = active_df[active_df["character_name"] == selected_char]
+        # Used for character-owned stats (rolls, spells, damage taken)
+        active_df = df[df["character_name"] == selected_char]
+        # Used for damage dealt so AOE hits (where character_name = target) still count
+        if "source_actor" in df.columns:
+            damage_source_df = df[df["source_actor"] == selected_char]
+        else:
+            damage_source_df = active_df
+    else:
+        active_df = df
+        damage_source_df = df
 
     # --- TOP METRICS ROW ---
     col1, col2, col3, col4 = st.columns(4)
-    
-    total_rolls = len(df[df["event_type"].isin(["attack-roll", "saving-throw", "skill-check"])])
-    nat_20s = len(df[df["raw_d20"] == 20])
-    nat_1s = len(df[df["raw_d20"] == 1])
-    #total_damage = df[df["event_type"] == "damage_dealt"]["value"].sum()
-    # In app.py, replace the total_damage calculation[cite: 9]:
-    if "source_actor" in active_df.columns:
-        # Sum applied damage across all targets hit (captures 4 x 20 = 80 for AOE)
-        applied_dmg = active_df[
-            (active_df["event_type"] == "damage_taken") &
-            (active_df["source_actor"].notna())
+
+    total_rolls = len(active_df[active_df["event_type"].isin(["attack-roll", "saving-throw", "skill-check"])])
+    nat_20s = len(active_df[active_df["raw_d20"] == 20])
+    nat_1s = len(active_df[active_df["raw_d20"] == 1])
+
+    if "source_actor" in damage_source_df.columns:
+        applied_dmg = damage_source_df[
+            (damage_source_df["event_type"] == "damage_taken") &
+            (damage_source_df["source_actor"].notna())
         ]
-        total_damage = applied_dmg["value"].sum() if not applied_dmg.empty else active_df[active_df["event_type"] == "damage_dealt"]["value"].sum()
+        total_damage = applied_dmg["value"].sum() if not applied_dmg.empty else damage_source_df[damage_source_df["event_type"] == "damage_dealt"]["value"].sum()
     else:
-        total_damage = active_df[active_df["event_type"] == "damage_dealt"]["value"].sum()
+        total_damage = damage_source_df[damage_source_df["event_type"] == "damage_dealt"]["value"].sum()
 
     if selected_char != "All":
         if "source_actor" in active_df.columns:
