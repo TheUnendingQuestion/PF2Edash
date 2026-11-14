@@ -120,7 +120,7 @@ else:
     st.markdown("---")
 
     # --- TABS FOR DIFFERENT STATS ---
-   tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "🎲 Dice & Combat",
         "🎯 Skill Success Rates",
         "🔮 Spells Cast",
