@@ -385,7 +385,12 @@ else:
 
     with tab5:
         st.subheader("Recent Game Activity Feed")
-        st.dataframe(df[["timestamp", "character_name", "event_type", "skill_name", "value", "spell_name", "outcome"]], use_container_width=True)
+        activity_df = active_df.sort_values(by="timestamp", ascending=False)
+        st.dataframe(
+            activity_df[["timestamp", "character_name", "event_type", "skill_name", "value", "spell_name", "outcome"]],
+            use_container_width=True,
+            hide_index=True
+        )
     # Auto-refresh mechanism for Streamlit
     if st.button("🔄 Refresh Data"):
         st.rerun()
