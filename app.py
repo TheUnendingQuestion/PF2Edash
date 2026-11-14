@@ -120,12 +120,13 @@ else:
     st.markdown("---")
 
     # --- TABS FOR DIFFERENT STATS ---
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+   tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "🎲 Dice & Combat",
         "🎯 Skill Success Rates",
         "🔮 Spells Cast",
         "💰 Party Wealth",
         "📜 Raw Event Log",
+        "🛡️ Saving Throws",
     ])
 
     with tab1:
@@ -394,3 +395,88 @@ else:
     # Auto-refresh mechanism for Streamlit
     if st.button("🔄 Refresh Data"):
         st.rerun()
+
+    with tab6:
+        st.subheader("🛡️ Saving Throw Breakdown")
+        saves_df = active_df[active_df["event_type"] == "saving-throw"].copy()
+
+        # Fallback if older rows have null skill_name
+        if "skill_name" in saves_df.columns:
+            saves_df["save_type"] = saves_df["skill_name"].fillna("Unknown").str.capitalize()
+        else:
+            saves_df["save_type"] = "Unknown"
+
+        if not saves_df.empty:
+            # --- 1. STACKED BAR CHART BY SAVE TYPE & OUTCOME ---
+            outcome_order = ["criticalSuccess", "success", "failure", "criticalFailure"]
+            chart_df = (
+                saves_df[saves_df["outcome"].isin(outcome_order)]
+                .groupby(["save_type", "outcome"])
+                .size()
+                .reset_index(name="count")
+            )
+
+            if not chart_df.empty:
+                chart = alt.Chart(chart_df).mark_bar().encode(
+                    x=alt.X("save_type:N", title="Saving Throw"),
+                    y=alt.Y("count:Q", title="Number of Rolls"),
+                    color=alt.Color(
+                        "outcome:N",
+                        title="Outcome",
+                        scale=alt.Scale(
+                            domain=outcome_order,
+                            range=["#27ae60", "#2ecc71", "#e67e22", "#e74c3c"]
+                        )
+                    )
+                ).properties(height=300)
+                st.altair_chart(chart, use_container_width=True)
+
+            st.markdown("---")
+            st.subheader("📊 Detailed Saving Throw Table")
+
+            # --- 2. SUMMARY TABLE WITH CRITICAL & STANDARD COUNTS ---
+            save_table_data = []
+            for save_name, group in saves_df.groupby("save_type"):
+                total = len(group)
+                crit_success = len(group[group["outcome"] == "criticalSuccess"])
+                success = len(group[group["outcome"] == "success"])
+                failure = len(group[group["outcome"] == "failure"])
+                crit_failure = len(group[group["outcome"] == "criticalFailure"])
+
+                total_successes = crit_success + success
+                success_rate = (total_successes / total) if total > 0 else 0.0
+
+                save_table_data.append({
+                    "Save Type": save_name,
+                    "Total Rolls": total,
+                    "Crit Success 🌟": crit_success,
+                    "Success 🟢": success,
+                    "Failure 🔴": failure,
+                    "Crit Failure 💀": crit_failure,
+                    "Success Rate": success_rate,
+                })
+
+            save_summary_df = pd.DataFrame(save_table_data).sort_values(by="Total Rolls", ascending=False)
+
+            st.dataframe(
+                save_summary_df,
+                column_config={
+                    "Save Type": st.column_config.TextColumn("Save Type"),
+                    "Total Rolls": st.column_config.NumberColumn("Total Rolls"),
+                    "Crit Success 🌟": st.column_config.NumberColumn("Crit Success 🌟"),
+                    "Success 🟢": st.column_config.NumberColumn("Success 🟢"),
+                    "Failure 🔴": st.column_config.NumberColumn("Failure 🔴"),
+                    "Crit Failure 💀": st.column_config.NumberColumn("Crit Failure 💀"),
+                    "Success Rate": st.column_config.ProgressColumn(
+                        "Success Rate",
+                        help="Percentage of saves resulting in Success or Critical Success",
+                        format="%.1f%%",
+                        min_value=0.0,
+                        max_value=1.0,
+                    ),
+                },
+                hide_index=True,
+                use_container_width=True
+            )
+        else:
+            st.info("No saving throws logged yet for this selection.")
