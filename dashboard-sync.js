@@ -91,9 +91,6 @@ Hooks.on("createChatMessage", (message) => {
   }
   if (!activeActor || activeActor.type !== "character") return;
 
-  const pf2eFlags = message.flags?.pf2e;
-  const context = pf2eFlags?.context;
-
   // 2. Detect Healing Done
   if (message.isRoll && context?.type === "damage-roll") {
     const isHealing = message.rolls[0]?.options?.evaluateHealing ||
