@@ -81,7 +81,26 @@ else:
     total_rolls = len(df[df["event_type"].isin(["attack-roll", "saving-throw", "skill-check"])])
     nat_20s = len(df[df["raw_d20"] == 20])
     nat_1s = len(df[df["raw_d20"] == 1])
-    total_damage = df[df["event_type"] == "damage_dealt"]["value"].sum()
+    #total_damage = df[df["event_type"] == "damage_dealt"]["value"].sum()
+    # In app.py, replace the total_damage calculation[cite: 9]:
+    if "source_actor" in active_df.columns:
+        # Sum applied damage across all targets hit (captures 4 x 20 = 80 for AOE)
+        applied_dmg = active_df[
+            (active_df["event_type"] == "damage_taken") &
+            (active_df["source_actor"].notna())
+        ]
+        total_damage = applied_dmg["value"].sum() if not applied_dmg.empty else active_df[active_df["event_type"] == "damage_dealt"]["value"].sum()
+    else:
+        total_damage = active_df[active_df["event_type"] == "damage_dealt"]["value"].sum()
+
+    if selected_char != "All":
+    if "source_actor" in active_df.columns:
+        active_df = active_df[
+            (active_df["character_name"] == selected_char) |
+            (active_df["source_actor"] == selected_char)
+        ]
+    else:
+        active_df = active_df[active_df["character_name"] == selected_char]
 
     col1.metric("Total Rolls Logged", total_rolls)
     col2.metric("Natural 20s 🎯", nat_20s, delta=f"{nat_20s} crits")
