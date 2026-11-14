@@ -130,8 +130,8 @@ Hooks.on("createChatMessage", (message) => {
     const d20Result = message.rolls[0]?.terms[0]?.results[0]?.result;
 
     let skillName = null;
-    if (context.type === "skill-check") {
-      skillName = context.domains?.[0] || null;
+    if (context.type === "skill-check" || context.type === "saving-throw") {
+      skillName = context.slug || context.domains?.[0] || null;
     }
 
     sendToDashboard({
