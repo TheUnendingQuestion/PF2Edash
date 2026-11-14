@@ -94,13 +94,13 @@ else:
         total_damage = active_df[active_df["event_type"] == "damage_dealt"]["value"].sum()
 
     if selected_char != "All":
-    if "source_actor" in active_df.columns:
-        active_df = active_df[
-            (active_df["character_name"] == selected_char) |
-            (active_df["source_actor"] == selected_char)
-        ]
-    else:
-        active_df = active_df[active_df["character_name"] == selected_char]
+        if "source_actor" in active_df.columns:
+            active_df = active_df[
+                (active_df["character_name"] == selected_char) |
+                (active_df["source_actor"] == selected_char)
+            ]
+        else:
+            active_df = active_df[active_df["character_name"] == selected_char]
 
     col1.metric("Total Rolls Logged", total_rolls)
     col2.metric("Natural 20s 🎯", nat_20s, delta=f"{nat_20s} crits")
