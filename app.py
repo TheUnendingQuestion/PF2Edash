@@ -144,6 +144,51 @@ else:
             st.info("No Natural 1s or 20s logged yet.")
 
         st.markdown("---")
+        st.subheader("🎯 Average d20 Roll by Character")
+
+        # Use active_df if you have character/GM filtering active; otherwise use df
+        source_d20_df = active_df.copy() if "active_df" in locals() else df.copy()
+
+        # Exclude secret rolls unless GM mode is active
+        if "is_secret" in source_d20_df.columns and not locals().get("is_gm", False):
+            source_d20_df = source_d20_df[source_d20_df["is_secret"] != True]
+
+        # Convert raw_d20 to numeric so non-d20 events (damage, healing, spells) are dropped cleanly
+        source_d20_df["raw_d20_num"] = pd.to_numeric(source_d20_df["raw_d20"], errors="coerce")
+        d20_rolls_df = source_d20_df.dropna(subset=["raw_d20_num", "character_name"])
+
+        if not d20_rolls_df.empty:
+            avg_d20_df = (
+                d20_rolls_df.groupby("character_name")["raw_d20_num"]
+                .agg(
+                    Rolls_Counted="count",
+                    Average_d20="mean",
+                    Lowest_d20="min",
+                    Highest_d20="max",
+                )
+                .reset_index()
+                .sort_values(by="Average_d20", ascending=False)
+            )
+
+            st.dataframe(
+                avg_d20_df,
+                column_config={
+                    "character_name": st.column_config.TextColumn("Character"),
+                    "Rolls_Counted": st.column_config.NumberColumn("d20 Rolls"),
+                    "Average_d20": st.column_config.NumberColumn(
+                        "Average d20",
+                        format="%.2f",
+                    ),
+                    "Lowest_d20": st.column_config.NumberColumn("Lowest"),
+                    "Highest_d20": st.column_config.NumberColumn("Highest"),
+                },
+                hide_index=True,
+                use_container_width=True,
+            )
+        else:
+            st.info("No d20 rolls logged yet.")
+
+        st.markdown("---")
         st.subheader("⚔️ Attack Roll Success Rates")
 
         # Filter specifically for attack rolls
