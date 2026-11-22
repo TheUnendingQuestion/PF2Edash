@@ -159,9 +159,9 @@ Hooks.on("createChatMessage", (message) => {
 
   // 5. Spells Cast
   const isSpellOrigin = pf2eFlags?.origin?.type === "spell";
-  const isDamageRoll = context?.type === "damage-roll";
+  const isRollOrCheck = Boolean(message.isRoll || context?.type);
 
-  if (isSpellOrigin && !isDamageRoll) {
+  if (isSpellOrigin && !isRollOrCheck) {
     sendToDashboard({
       message_id: message.id,
       character_name: activeActor.name,
