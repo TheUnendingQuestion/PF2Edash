@@ -48,6 +48,15 @@ if "is_secret" in display_df.columns:
     display_df.loc[display_df["is_secret"] == True, "raw_d20"] = "🔒 Secret"
     display_df.loc[display_df["is_secret"] == True, "value"] = "🔒 Hidden"
 
+PLAYER_CHRACTERS = {
+    "Calden Orphion",
+    "Yrsa Valstad",
+    "Jasper Redmane",
+    "Rakkirik",
+    "Fafnir"
+}
+
+
 # --- TITLE ---
 st.title("🛡️ Pathfinder 2e: Live Campaign Dashboard")
 st.markdown("Tracking dice rolls, wealth, spells, and damage live from Foundry VTT.")
@@ -75,17 +84,25 @@ else:
 
     selected_char = st.sidebar.selectbox("Filter by Character", ["All"] + characters)
 
+    present_names = set(df["character_name"].dropna().unique())
+    if "source_actor" in df.columns:
+        present_names |= set(df["source_actor"].dropna().unique())
+
+    pc_options = sorted(present_names & PLAYER_CHARACTERS)
+    selected_char = st.sidebar.selectbox("Filter by Character", ["All"] + pc_options)
+
     if selected_char != "All":
-        # Used for character-owned stats (rolls, spells, damage taken)
         active_df = df[df["character_name"] == selected_char]
-        # Used for damage dealt so AOE hits (where character_name = target) still count
         if "source_actor" in df.columns:
             damage_source_df = df[df["source_actor"] == selected_char]
         else:
             damage_source_df = active_df
     else:
         active_df = df
-        damage_source_df = df
+        if "source_actor" in df.columns:
+            damage_source_df = df[df["source_actor"].isin(PLAYER_CHARACTERS)]
+        else:
+            damage_source_df = df[df["character_name"].isin(PLAYER_CHARACTERS)]
 
     # --- TOP METRICS ROW ---
     col1, col2, col3, col4 = st.columns(4)
