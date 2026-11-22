@@ -82,8 +82,6 @@ else:
     if "source_actor" in df.columns:
         characters = sorted(set(characters + df["source_actor"].dropna().unique().tolist()))
 
-    selected_char = st.sidebar.selectbox("Filter by Character", ["All"] + characters)
-
     present_names = set(df["character_name"].dropna().unique())
     if "source_actor" in df.columns:
         present_names |= set(df["source_actor"].dropna().unique())
