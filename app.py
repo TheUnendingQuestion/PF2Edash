@@ -265,7 +265,10 @@ else:
         # --- DAMAGE TAKEN TABLE ---
         st.markdown("---")
         st.subheader("🩸 Damage Taken Summary")
-        damage_taken_df = df[df["event_type"] == "damage_taken"]
+        damage_taken_df = active_df[
+            (active_df["event_type"] == "damage_taken") &
+            (active_df["character_name"].isin(PLAYER_CHARACTERS))
+        ]
 
         if not damage_taken_df.empty:
             taken_summary = damage_taken_df.groupby("character_name")["value"].agg(
