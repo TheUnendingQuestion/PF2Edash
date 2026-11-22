@@ -441,8 +441,21 @@ else:
     
     with tab4:
         st.subheader("Wealth Progression (GP)")
-        wealth_df = df[df["event_type"].isin(["wealth_update", "party_wealth_update"])]
+        wealth_source_df = active_df if "active_df" in locals() else df
+
+        if selected_char != "All":
+            wealth_df = wealth_source_df[
+                (wealth_source_df["event_type"] == "wealth_update") &
+                (wealth_source_df["character_name"] == selected_char)
+            ].copy()
+        else:
+            wealth_df = wealth_source_df[
+                wealth_source_df["event_type"].isin(["wealth_update", "party_wealth_update"])
+            ].copy()
+
         if not wealth_df.empty:
+            wealth_df["timestamp"] = pd.to_datetime(wealth_df["timestamp"], errors="coerce")
+            wealth_df = wealth_df.dropna(subset=["timestamp"]).sort_values(by="timestamp")
             st.line_chart(wealth_df, x="timestamp", y="value", color="character_name")
         else:
             st.write("No wealth updates logged yet.")
