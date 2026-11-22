@@ -48,7 +48,7 @@ if "is_secret" in display_df.columns:
     display_df.loc[display_df["is_secret"] == True, "raw_d20"] = "🔒 Secret"
     display_df.loc[display_df["is_secret"] == True, "value"] = "🔒 Hidden"
 
-PLAYER_CHRACTERS = {
+PLAYER_CHARACTERS = {
     "Calden Orphion",
     "Yrsa Valstad",
     "Jasper Redmane",
